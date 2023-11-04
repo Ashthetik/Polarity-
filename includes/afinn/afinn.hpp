@@ -1,4 +1,5 @@
-#ifndef polarity_hpp
+#ifndef AFINN_HPP
+#define AFINN_HPP
 
 #include <unordered_map>
 #include <string>
@@ -380,4 +381,4 @@ private:
     };
 };
 
-#endif
+#endif /* afinn_hpp */

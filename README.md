@@ -8,5 +8,5 @@
 
 ### TODO LIST:
 - [x] Rewrite RPPGA code to be modular
-- [ ] Create NodeJS and Python Bindings
+- [x] Create Python Bindings
 - [ ] Support Mobile?
