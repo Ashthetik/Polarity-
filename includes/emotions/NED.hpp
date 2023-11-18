@@ -9,55 +9,64 @@ using namespace cv::face;
 
 class NED {
     public:
-        std::string detectEmotion(void) {
-            std::string label;
-            bool firstFrame = true;
-            CascadeClassifier faceDetector;
-            Mat frame, gray, lastFrame;
-            std::vector<Rect> faces;
-            std::vector<std::vector<Point2f>> landmarks;
+        std::string detectEmotion(cv::VideoCapture webCam) {
+			std::string label;
+			bool firstFrame = true;
+			CascadeClassifier faceDetector;
+			Mat frame, gray, lastFrame;
+			std::vector<Rect> faces;
+			std::vector<std::vector<Point2f>> landmarks;
 
-            std::string cascadeFileName = "data/haarcascade_frontalface_alt2.xml";
-            std::string modelFileName = "data/lbfmodel.yml";
+			std::string cascadeFileName = "data/haarcascade_frontalface_alt2.xml";
+			std::string modelFileName = "data/lbfmodel.yml";
 
-            try {
-                faceDetector.load(cascadeFileName);
-            } catch (std::exception& e) {
-                std::cout << "Error loading cascade classifier: " << e.what() << std::endl;
-                return "Error loading cascade classifier";
-            }
+			try {
+					faceDetector.load(cascadeFileName);
+			} catch (std::exception& e) {
+					std::cout << "Error loading cascade classifier: " << e.what() << std::endl;
+					return "Error loading cascade classifier";
+			}
 
-            Ptr<Facemark> facemark = FacemarkLBF::create();
-            facemark->loadModel(modelFileName);
+			Ptr<Facemark> facemark = FacemarkLBF::create();
+			facemark->loadModel(modelFileName);
 
-            VideoCapture webCam(0);
+			if (!webCam.isOpened()) {
+				std::cout << "[WARN] {VideoCapture} - Camera not opened. Trying to open now.\n" << std::endl;
+				try {
+					webCam.open(0);
+				} catch (Exception& e) {
+					std::cout << "[ERROR] {VideoCapture} - Camera couldn't be opened. Please make sure the camera is properly connected/available.\n" << std::endl;
+					std::cout << e.what() << std::endl;
+					std::exit(-1);
+				}
+			}
 
-            while (webCam.read(frame)) {
-                faces.clear();
-                landmarks.clear();
+			while (webCam.read(frame)) {
+					faces.clear();
+					landmarks.clear();
 
-                cvtColor(frame, gray, COLOR_BGR2GRAY);
+					cvtColor(frame, gray, COLOR_BGR2GRAY);
 
-                if (firstFrame) {
-                    lastFrame = gray.clone();
-                    firstFrame = false;
-                }
+					if (firstFrame) {
+					lastFrame = gray.clone();
+					firstFrame = false;
+					}
 
-                faceDetector.detectMultiScale(gray, faces);
-                bool success = facemark->fit(gray, faces, landmarks);
+					faceDetector.detectMultiScale(gray, faces);
+					bool success = facemark->fit(gray, faces, landmarks);
 
-                if (success) {
-                    label = getEmotion(
-                        gray, lastFrame, faceDetector, landmarks, faces, facemark
-                    );
-                } else {
-                    label = "No emotion detected";
-                }
+					if (success) {
+					label = getEmotion(
+							gray, lastFrame, faceDetector, landmarks, faces, facemark
+					);
+					} else {
+					label = "No emotion detected";
+					}
 
-                lastFrame = gray.clone();
-            }
+					lastFrame = gray.clone();
+			}
 
-            return label;
+			return label;
         }
 
     private:

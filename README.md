@@ -10,3 +10,6 @@
 - [x] Rewrite RPPGA code to be modular
 - [x] Create Python Bindings
 - [ ] Support Mobile?
+- [ ] Create install instructions (wiki???)
+- [ ] Rewrite code to automatically share the camera 
+- [ ] `main.cpp` allows for selection of what to use

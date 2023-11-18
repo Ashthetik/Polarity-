@@ -49,10 +49,7 @@ public:
         }
     }
 
-    float runScan(int argc, char* argv[]) {
-        Heartbeat cmd_line(argc, argv);
-        string filepath = cmd_line.get_arg("-i"); // input file path (video)
-
+    float runScan(VideoCapture capture) {
         rPPGAlgorithm rPPGA;
         faceDetAlgorithm faceDetA;
         double rescanFreq;
@@ -60,54 +57,12 @@ public:
         int maxSignSize;
         int minSignSize;
 
-        string faceDetA_str = cmd_line.get_arg("-f");
-        string rPPGA_str = cmd_line.get_arg("-r");
-        string rescanFreq_str = cmd_line.get_arg("-rf");
-        string samplingFreq_str = cmd_line.get_arg("-sf");
-        string maxSign_str = cmd_line.get_arg("-max");
-        string minSign_str = cmd_line.get_arg("-min");
-
-        if (rPPGA_str == "") {
-            rPPGA = to_rppgAlgorithm(DEFAULT_RPPG_ALGORITHM);
-        }
-        else {
-            rPPGA = to_rppgAlgorithm(rPPGA_str.c_str());
-        }
-
-        if (faceDetA_str == "") {
-            faceDetA = to_faceDetAlgorithm(DEFAULT_FACEDET_ALGORITHM);
-        }
-        else {
-            faceDetA = to_faceDetAlgorithm(faceDetA_str.c_str());
-        }
-
-        if (rescanFreq_str == "") {
-            rescanFreq = DEFAULT_RESCAN_FREQUENCY;
-        }
-        else {
-            rescanFreq = atof(rescanFreq_str.c_str());
-        }
-
-        if (samplingFreq_str == "") {
-            samplingFreq = DEFAULT_SAMPLING_FREQUENCY;
-        }
-        else {
-            samplingFreq = atof(samplingFreq_str.c_str());
-        }
-
-        if (maxSign_str == "") {
-            maxSignSize = DEFAULT_MAX_SIGNAL_SIZE;
-        }
-        else {
-            maxSignSize = atof(maxSign_str.c_str());
-        }
-
-        if (minSign_str == "") {
-            minSignSize = DEFAULT_MIN_SIGNAL_SIZE;
-        }
-        else {
-            minSignSize = atof(minSign_str.c_str());
-        }
+        rPPGA = to_rppgAlgorithm(DEFAULT_RPPG_ALGORITHM);
+        faceDetA = to_faceDetAlgorithm(DEFAULT_FACEDET_ALGORITHM);
+        rescanFreq = DEFAULT_RESCAN_FREQUENCY;
+        samplingFreq = DEFAULT_SAMPLING_FREQUENCY;
+        maxSignSize = DEFAULT_MAX_SIGNAL_SIZE;
+        minSignSize = DEFAULT_MIN_SIGNAL_SIZE;
 
         if (minSignSize > maxSignSize) {
             cout << "Error: min signal size is greater than max signal size." << endl;
@@ -116,13 +71,7 @@ public:
 
         // Downsample
         int downsample;
-        string downsample_str = cmd_line.get_arg("-ds");
-        if (downsample_str == "") {
-            downsample = DEFAULT_DOWNSAMPLE;
-        }
-        else {
-            downsample = atof(downsample_str.c_str());
-        }
+        downsample = DEFAULT_DOWNSAMPLE;
         
         std::ifstream test1(HAAR_CLASSIFIER_PATH);
         if (!test1) {
@@ -142,19 +91,18 @@ public:
             exit(0);
         }
 
-        VideoCapture capture;
-        bool isoffline = filepath != "";
-        if (isoffline) {
-            capture.open(filepath);
-        }
-        else {
-            capture.open(0);
-        }
         if (!capture.isOpened()) {
-            return -1;
+            std::cout << "[WARN] {VideoCapture} - Camera is not already open. Trying to open now\n" << std::endl;
+            try {
+                capture.open(0);
+            } catch (Exception& e) {
+                std::cout << "[ERROR] {VideoCapture} - Camera couldn't be opened. Please make sure the camera is properly connected/available.\n" << std::endl;
+                std::cout << e.what() << std::endl;
+                std::exit(-1);
+            }
         }
 
-        string title = isoffline ? filepath : "Webcam";
+        string title = "Webcam";
 
         const int WIDTH = capture.get(CAP_PROP_FRAME_WIDTH);
         const int HEIGHT = capture.get(CAP_PROP_FRAME_HEIGHT);
@@ -189,9 +137,7 @@ public:
             cvtColor(frameRGB, frameGray, COLOR_BGR2GRAY);
             equalizeHist(frameGray, frameGray);
 
-            int time;
-            if (isoffline) { time = (int)capture.get(CAP_PROP_POS_MSEC); }
-            else { time = (getTickCount() * 1000.0) / getTickFrequency(); }
+            int time = (getTickCount() * 1000.0) / getTickFrequency();
 
             if (i % downsample) {
                 bpm = rppg.processFrame(frameRGB, frameGray, time);
