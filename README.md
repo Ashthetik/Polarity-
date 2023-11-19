@@ -12,4 +12,4 @@
 - [ ] Support Mobile?
 - [ ] Create install instructions (wiki???)
 - [ ] Rewrite code to automatically share the camera 
-- [ ] `main.cpp` allows for selection of what to use
+- [ ] Rewrite `main.cpp` so it allows for selection of what to use
