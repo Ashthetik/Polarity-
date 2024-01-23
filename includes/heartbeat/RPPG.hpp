@@ -123,11 +123,10 @@ public:
         const double samplingFrequency, const double rescanFrequency,
         const int minSignalSize, const int maxSignalSize,
         const string &haarPath,const string &dnnProtoPath, 
-        const string &dnnModelPath, const bool gui
+        const string &dnnModelPath
     ) {
         this->rPPGAlg = rPPGAlg;
         this->faceDetAlg = faceDetAlg;
-        this->guiMode = gui;
         this->lastSamplingTime = 0;
         this->minFaceSize = Size(min(width, height) * REL_MIN_FACE_SIZE, min(width, height) * REL_MIN_FACE_SIZE);
         this->maxSignalSize = maxSignalSize;
@@ -158,12 +157,10 @@ public:
         if (!faceValid) {
             lastScanTime = time;
             detectFace(frameRGB, frameGray);
-
         } else if ((time - lastScanTime) * timeBase >= 1/rescanFrequency) {
             lastScanTime = time;
             detectFace(frameRGB, frameGray);
             rescanFlag = true;
-
         } else {
             trackFace(frameGray);
         }
@@ -173,7 +170,7 @@ public:
             fps = getFps(t, timeBase);
 
             // Remove old values from raw signal buffer
-            while (s.rows > fps * maxSignalSize) {
+            while (s.rows > (fps * maxSignalSize)) {
                 push(s);
                 push(t);
                 push(re);
@@ -213,9 +210,6 @@ public:
                 }
                 // HR estimation
                 bpm = estimateHeartrate();
-            }
-            if (guiMode) {
-                ;
             }
         }
         rescanFlag = false;
