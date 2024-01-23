@@ -215,7 +215,7 @@ public:
                 bpm = estimateHeartrate();
             }
             if (guiMode) {
-                draw(frameRGB);
+                ;
             }
         }
         rescanFlag = false;
@@ -557,103 +557,6 @@ private:
         }
 
         return (float)(bpm);
-    };
-
-    void draw(Mat &frameRGB) {
-        // Draw roi
-        rectangle(frameRGB, roi, GREEN);
-
-        // Draw bounding box
-        rectangle(frameRGB, box, WHITE);
-
-        // Draw signal
-        if (!s_f.empty() && !powerSpectrum.empty()) {
-
-            // Display of signals with fixed dimensions
-            double displayHeight = box.height/2.0;
-            double displayWidth = box.width*0.8;
-
-            vector<ld> inputY;
-            inputY.push_back(s_f.at<double>(0, 0));
-            
-            // Draw signal
-            double vmin, vmax;
-            Point pmin, pmax;
-            minMaxLoc(s_f, &vmin, &vmax, &pmin, &pmax);
-            double heightMult = displayHeight/(vmax - vmin);
-            double widthMult = displayWidth/(s_f.rows - 1);
-            double drawAreaTlX = box.tl().x + box.width + 20;
-            double drawAreaTlY = box.tl().y;
-            Point p1(drawAreaTlX, drawAreaTlY + (vmax - s_f.at<double>(0, 0))*heightMult);
-            Point p2;
-            for (int i = 1; i < s_f.rows; i++) {
-                p2 = Point(drawAreaTlX + i * widthMult, drawAreaTlY + (vmax - s_f.at<double>(i, 0))*heightMult);
-                line(frameRGB, p1, p2, RED, 2);
-                p1 = p2;
-                
-                inputY.push_back(s_f.at<double>(i, 0));
-            }
-
-            //draw zScore peak data
-            int lag = 5; //30;
-            ld threshold = 3.5; //5.0;
-            ld influence = 0.5; //0.0;
-            unordered_map<string, vector<ld>> output = z_score_thresholding(inputY, lag, threshold, influence);
-            
-            cv::Point p3(drawAreaTlX, drawAreaTlY + (vmax - output["signals"][0])*heightMult);
-            cv::Point p4;
-            for (int i = 1; i < output["signals"].size(); i++) {
-                p4 = cv::Point(drawAreaTlX + i * widthMult, drawAreaTlY + (vmax - output["signals"][i])*heightMult);
-                line(frameRGB, p3, p4, WHITE, 2);
-                p3 = p4;
-            }
-            
-            if(output["signals"][output["signals"].size()-1] == 1){
-                circle( frameRGB, cv::Point(50,50),30,Scalar( 0, 0, 255 ),FILLED,LINE_8 );
-            } else{
-                circle( frameRGB, cv::Point(50,50),30,Scalar( 0, 0, 255 ),1,LINE_8 );
-            }
-            
-            // Draw powerSpectrum
-            const int total = s_f.rows;
-            Mat bandMask = Mat::zeros(s_f.size(), CV_8U);
-
-            bandMask.rowRange(min(low, total), min(high, total) + 1).setTo(ONE);
-            minMaxLoc(powerSpectrum, &vmin, &vmax, &pmin, &pmax, bandMask);
-            
-            heightMult = displayHeight/(vmax - vmin);
-            widthMult = displayWidth/(high - low);
-            drawAreaTlX = box.tl().x + box.width + 20;
-            drawAreaTlY = box.tl().y + box.height/2.0;
-            p1 = Point(drawAreaTlX, drawAreaTlY + (vmax - powerSpectrum.at<double>(low, 0))*heightMult);
-            
-            for (int i = low + 1; i <= high; i++) {
-                p2 = Point(drawAreaTlX + (i - low) * widthMult, drawAreaTlY + (vmax - powerSpectrum.at<double>(i, 0)) * heightMult);
-                line(frameRGB, p1, p2, RED, 2);
-                p1 = p2;
-            }
-        }
-
-        std::stringstream ss;
-
-        // Draw BPM text
-        if (faceValid) {
-            ss.precision(3);
-            ss << meanBpm << " bpm";
-            putText(frameRGB, ss.str(), Point(box.tl().x, box.tl().y - 10), FONT_HERSHEY_PLAIN, 2, RED, 2);
-        }
-
-        // Draw FPS text
-        ss.str("");
-        ss << fps << " fps";
-        putText(frameRGB, ss.str(), Point(box.tl().x, box.br().y + 40), FONT_HERSHEY_PLAIN, 2, GREEN, 2);
-
-        // Draw corners
-        for (int i = 0; i < corners.size(); i++) {
-            //circle(frameRGB, corners[i], r, WHITE, -1, 8, 0);
-            line(frameRGB, Point(corners[i].x-5,corners[i].y), Point(corners[i].x+5,corners[i].y), GREEN, 1);
-            line(frameRGB, Point(corners[i].x,corners[i].y-5), Point(corners[i].x,corners[i].y+5), GREEN, 1);
-        }
     };
 
     void invalidateFace() {
