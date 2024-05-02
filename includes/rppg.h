@@ -28,6 +28,7 @@ typedef unsigned int uint;
 typedef std::vector<ld>::iterator vec_iter_ld;
 
 class VectorStats {
+public:
     VectorStats(vec_iter_ld start, vec_iter_ld end);
 
 public:
@@ -38,8 +39,8 @@ public:
 private:
     vec_iter_ld start;
     vec_iter_ld end;
-    ld m1;
-    ld m2;
+    ld m1; // Standard Mean
+    ld m2; // Deviation Mean
 };
 
 enum rPPGAlgorithm { g, pca, xminay };
@@ -47,7 +48,7 @@ enum faceDetAlgorithm { haar, deep };
 
 class RPPG {
 public:
-    RPPG();
+    RPPG(void);
 
     bool load(
         const rPPGAlgorithm rppga, const faceDetAlgorithm fda,

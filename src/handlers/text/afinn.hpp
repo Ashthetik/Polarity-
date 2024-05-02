@@ -15,7 +15,18 @@ int AFINN::getText(std::string text) {
                 int value = std::stoi(line.substr(pos + 1));
                 textPolarity[word] = value;
             }
+            file.close();
         }
+
+        auto it = textPolarity.find(text);
+        if (it != textPolarity.end()) {
+            return it->second;
+        } return 0;
+    } else {
+        auto it = textPolarity.find(text);
+        if (it != textPolarity.end()) {
+            return it->second;
+        } return 0;
     }
 };
 
