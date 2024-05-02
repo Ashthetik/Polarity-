@@ -31,5 +31,9 @@ int AFINN::getText(std::string text) {
 };
 
 int AFINN::getEmoji(std::string emoji) {
-
+    auto it = emojiPolarity.find(emoji);
+    if (it != emojiPolarity.end()) {
+        return it->second;
+    }
+    return 0;
 }
