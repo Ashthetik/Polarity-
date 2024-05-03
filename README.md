@@ -1,4 +1,6 @@
 # Polarity++
+> [!IMPORTANT]
+> Project permanently ceased
 ## What is it?
  Polarity++ is a C++ library combining Facial Emotional Recognition (FER), AFINN-165 (Also known as "Sentimood"), and RPPG Heart Rate monitoring to bring a more diverse responsiveness to AI-led text-based/narrative games!
 
