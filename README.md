@@ -1,5 +1,9 @@
 # Polarity++
 
+> [!IMPORTANT]
+> This project is in **ALPHA** stages and __**IS NOT**__ expected to work and may cause potential damage in extreme cases.
+> Proceed at your own risk.
+
 ## Description:
 This project is a combination of facial emotion recognition (FER), sentiment analysis using the AFINN lexicon, and heart rate monitoring. The system will be integrated into NLP/LLM engine games and other applications to detect the player's emotional state and heart rate during gameplay. By incorporating these technologies, the system aims to create more reactive scenarios and NPCs to enhance the overall gaming experience.
 
