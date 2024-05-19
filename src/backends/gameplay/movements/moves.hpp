@@ -42,6 +42,7 @@ class MovementProcessor {
                       
             // predict expected values
             std::vector<float> pred;
+            #pragma omp parallel for
             for (int i = 0; i < 5; i++) {
                 pred.push_back(reg.predict(x_arr[i]));
             }
