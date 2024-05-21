@@ -72,7 +72,7 @@ class Collector {
         return this->table;
     }
 
-    int processMatrix(void) {
+    void processMatrix(void) {
         // Convert the matrix to a table;
         Table table = convertToTable();
 
@@ -92,14 +92,7 @@ class Collector {
                 target = std::stoi(table.data[i][3]);
             }
         }
-
-        if (target == 0) {
-            // No target found
-            return 0;
-        } else {
-            return target;
-        }
-    }
+    };
 
     private:
     // Action (int), occurence (float), combo (boolean), target (int)
