@@ -25,7 +25,7 @@ class Collector {
         this->currentMatrix = { 
             {
                 0, // Action
-                0.0, // Occurence
+                0, // Occurence
                 false, // Combo
                 0 // Target
             } 
@@ -95,7 +95,7 @@ class Collector {
     };
 
     private:
-    // Action (int), occurence (float), combo (boolean), target (int)
+    // Action (int), occurence (int), combo (boolean), target (int)
     Matrix currentMatrix;
     Table table;
 };

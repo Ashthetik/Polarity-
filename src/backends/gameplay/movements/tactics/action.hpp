@@ -9,9 +9,9 @@ class ActionProcessor {
         ActionProcessor() {};
         ~ActionProcessor() {};
 
-    void addDataToMatrix(float action, float occurence, bool combo, float target) {
-        if (occurence == .0) {
-            occurence = .1;
+    void addDataToMatrix(int action, int occurence, bool combo, int target) {
+        if (occurence == 0) {
+            occurence = 1;
         }
         Matrix mat = {
             {
