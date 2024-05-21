@@ -1,6 +1,9 @@
 #ifndef Matrix_HPP
 #define Matrix_HPP
 
+#include <iostream>
+#include <vector>
+
 struct Mat3D {
     float X;
     float Y;
@@ -33,6 +36,45 @@ struct Matrix {
 
     public:
         Matrix() = default;
+
+        void clear() {
+            for (int i = 0; i < 1; i++) {
+                for (int j = 0; j < 5; j++) {
+                    M[i][j] = 0;
+                }
+            }
+        }
+
+        void set(int i, int j, float value) {
+            M[i][j] = value;
+        }
+
+        float get(int i, int j) {
+            return M[i][j];
+        }
+
+        void print() {
+            for (int i = 0; i < 1; i++) {
+                for (int j = 0; j < 5; j++) {
+                    std::cout << M[i][j] << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+
+        static inline Matrix append(
+            Matrix newMat, Matrix current
+        ) {
+            // Append the new Matrix, to our current matrix
+            std::vector<Matrix> matrix;
+            matrix.push_back(current);
+            matrix.push_back(newMat);
+            
+            // Update the current matrix
+            current = matrix[1];
+
+            return current;
+        }
 };
 
 
@@ -53,6 +95,5 @@ Matrix convertMat5D(Mat5D position) {
 
     return converted;
 };
-
 
 #endif

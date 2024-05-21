@@ -62,16 +62,6 @@ public:
         Node root;
         root.treeIndex = 0;
         tree.push_back(root);
-        run(initTable, 0);
-    }
-
-    string guess(vector<string> row) {
-        string label = "";
-        int leafnode = dfs(row, 0);
-        if (leafnode != -1) {
-            label = tree[leafnode].label;
-        }
-        return label;
     }
 
     int dfs(vector<string>& row, int here) {
@@ -208,7 +198,7 @@ public:
         return make_pair(majorityLabel, majorityCount);
     }
 
-    void run(Table table, int nodeIndex) {
+    Table run(Table table, int nodeIndex) {
         if (isLeafNode(table) == true) {
             tree[nodeIndex].isLeaf = true;
             tree[nodeIndex].label = table.data[0].back();
@@ -243,6 +233,8 @@ public:
             tree[nodeIndex].children.push_back(nextNode.treeIndex);
 
             Table nextTable;
+
+            #pragma omp parallel for
             for (int j = 0; j < attrViewMap[nextNode.attrValue].size(); j++) {
                 vector<string> newRow;
                 for (int k = 0; k < table.data[attrViewMap[nextNode.attrValue][j]].size(); k++) {
@@ -255,6 +247,13 @@ public:
 
             run(nextTable, nextNode.treeIndex);
         }
+
+        // Return the table
+        return table;
+    }
+
+    auto predict(vector<string> row) {
+        return dfs(row, 0);
     }
 };
 
