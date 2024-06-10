@@ -251,10 +251,6 @@ public:
         // Return the table
         return table;
     }
-
-    auto predict(vector<string> row) {
-        return dfs(row, 0);
-    }
 };
 
 #endif
