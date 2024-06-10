@@ -7,6 +7,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/video.hpp>
+#include <opencv2/dnn_superres.hpp>
 #include "includes/opencv.hpp"
 #include "includes/rppg.h"
 
@@ -15,6 +16,7 @@
 using namespace std;
 using namespace cv;
 using namespace dnn;
+using namespace dnn_superres;
 
 #pragma endregion
 
@@ -87,11 +89,11 @@ ld VectorStats::standardDeviation() {
 RPPG::RPPG() {;}
 
 bool RPPG::load(
-    const rPPGAlgorithm rppga, const faceDetAlgorithm fda,
+    const rPPGAlgorithm rppga, const faceDetAlgorithm fda = deep,
     const int width, const int height, const double timebase, 
     const int downsample, const double samplingFrequency,
     const double rescanFrequency, const int minSignalSize,
-    const int maxSignalSize, const std::string& haarPath,
+    const int maxSignalSize,
     const std::string& dnnProtoPath, const std::string& dnnModelPath
 ) {
     try {
@@ -110,14 +112,8 @@ bool RPPG::load(
         this->timeBase = timeBase;
 
         // Load in the classifier
-        switch (fda) {
-            case haar:
-                haarClassifier.load(haarPath);
-                break;
-            case deep:
-                dnnClassifier = readNetFromCaffe(dnnProtoPath, dnnModelPath);
-                break;
-        }
+        
+        dnnClassifier = readNetFromCaffe(dnnProtoPath, dnnModelPath);
 
         return true;
     } catch (std::exception& exp) {
@@ -125,8 +121,41 @@ bool RPPG::load(
     }
 };
 
+int RPPG::runDetection() {
+    cv::VideoCapture cap(0);
+    if (!cap.isOpened()) {
+        std::cerr << "Error: Could not open camera" << std::endl;
+        return 1;
+    }
+
+    Mat frame, gray;
+    
+    if (frame.empty()) {
+        std::cerr << "Error: Could not grab frame" << std::endl;
+        return 1;
+    }
+
+    cvtColor(frame, gray, COLOR_BGR2GRAY);
+    equalizeHist(gray, gray);
+
+    this->processFrame(frame, gray, 0);
+}
+
+Mat upscaleImage(Mat img, string modelName, string ModelPath, int scale) {
+    DnnSuperResImpl sr;
+    sr.readModel(ModelPath);
+    sr.setModel(modelName, scale);
+    Mat result;
+    sr.upsample(img, result);
+    return result;
+}
+
 float RPPG::processFrame(Mat& frameRGB, Mat& frameGray, int time) {
     float bpm = 0.0;
+
+    // upscale the image
+    frameGray = upscaleImage(frameGray, "lapsrn", "LapSRN_x8.pb", 8);
+    frameRGB = upscaleImage(frameRGB, "lapsrn", "LapSRN_x8.pb", 8);
 
     // Set our current scan time (not system time)
     // if there's no valid face
@@ -267,38 +296,28 @@ unordered_map<string, vector<ld>> RPPG::z_score_thresholding(
 
 void RPPG::detectFace(Mat& frameRGB, Mat& frameGray) {
     vector<cv::Rect> boxes = {};
+    
+    // Detect faces with DNN
+    Mat resize300;
+    cv::resize(frameRGB, resize300, Size(300, 300));
+    Mat blob = blobFromImage(resize300, 1.0, Size(300, 300), Scalar(104.0, 177.0, 123.0));
+    dnnClassifier.setInput(blob);
+    Mat detection = dnnClassifier.forward();
+    Mat detectionMat(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());
+    float confidenceThreshold = 0.5;
 
-    switch (fda) {
-        case haar:
-            haarClassifier.detectMultiScale(
-                frameGray, boxes, 1.1, 2, 
-                CASCADE_SCALE_IMAGE, minFaceSize
-            );
-            break;
-        case deep:
-            // Detect faces with DNN
-            Mat resize300;
-            cv::resize(frameRGB, resize300, Size(300, 300));
-            Mat blob = blobFromImage(resize300, 1.0, Size(300, 300), Scalar(104.0, 177.0, 123.0));
-            dnnClassifier.setInput(blob);
-            Mat detection = dnnClassifier.forward();
-            Mat detectionMat(detection.size[2], detection.size[3], CV_32F, detection.ptr<float>());
-            float confidenceThreshold = 0.5;
-
-            for (int i = 0; i < detectionMat.rows; i++) {
-                float confidence = detectionMat.at<float>(i, 2);
-                if (confidence > confidenceThreshold) {
-                    int xLeftBottom = static_cast<int>(detectionMat.at<float>(i, 3) * frameRGB.cols);
-                    int yLeftBottom = static_cast<int>(detectionMat.at<float>(i, 4) * frameRGB.rows);
-                    int xRightTop = static_cast<int>(detectionMat.at<float>(i, 5) * frameRGB.cols);
-                    int yRightTop = static_cast<int>(detectionMat.at<float>(i, 6) * frameRGB.rows);
-                    Rect object((int)xLeftBottom, (int)yLeftBottom,
-                                (int)(xRightTop - xLeftBottom),
-                                (int)(yRightTop - yLeftBottom));
-                    boxes.push_back(object);
-                }
-            }
-            break;
+    for (int i = 0; i < detectionMat.rows; i++) {
+        float confidence = detectionMat.at<float>(i, 2);
+        if (confidence > confidenceThreshold) {
+            int xLeftBottom = static_cast<int>(detectionMat.at<float>(i, 3) * frameRGB.cols);
+            int yLeftBottom = static_cast<int>(detectionMat.at<float>(i, 4) * frameRGB.rows);
+            int xRightTop = static_cast<int>(detectionMat.at<float>(i, 5) * frameRGB.cols);
+            int yRightTop = static_cast<int>(detectionMat.at<float>(i, 6) * frameRGB.rows);
+            Rect object((int)xLeftBottom, (int)yLeftBottom,
+                        (int)(xRightTop - xLeftBottom),
+                        (int)(yRightTop - yLeftBottom));
+            boxes.push_back(object);
+        }
     }
 
     if (boxes.size() > 0) {

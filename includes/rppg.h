@@ -51,13 +51,15 @@ public:
     RPPG(void);
 
     bool load(
-        const rPPGAlgorithm rppga, const faceDetAlgorithm fda,
+        const rPPGAlgorithm rppga, const faceDetAlgorithm fda = deep,
         const int width, const int height, const double timebase, 
         const int downsample, const double samplingFrequency,
         const double rescanFrequency, const int minSignalSize,
-        const int maxSignalSize, const std::string& haarPath,
+        const int maxSignalSize,
         const std::string& dnnProtoPath, const std::string& dnnModelPath
     );
+
+    int runDetection();
 
     float processFrame(cv::Mat& frameRGB, cv::Mat& frameGray, int time);
     void exit();
@@ -84,7 +86,6 @@ private:
     // Algorithms
     rPPGAlgorithm rppga;
     faceDetAlgorithm fda;
-    cv::CascadeClassifier haarClassifier;
     cv::dnn::Net dnnClassifier;
 
     // Settings
