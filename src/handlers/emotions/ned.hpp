@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/face.hpp>
 #include "includes/emotions.h"
+#include "tools/image_smoothing.hpp"
 
 using namespace cv;
 using namespace cv::face;
@@ -41,6 +42,8 @@ std::string NED::detectEmotion(cv::VideoCapture camera) {
     }
 
     while (camera.read(frame)) {
+		ImageSmoothing::smooth(frame);
+
         faces.clear();
         landmarks.clear();
         cvtColor(frame, gray, COLOR_BGR2GRAY);
