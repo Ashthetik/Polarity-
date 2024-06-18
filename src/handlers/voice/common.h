@@ -108,7 +108,7 @@ bool gpt_vocab_init(const std::string & fname, gpt_vocab & vocab);
 //   - consider only the top K tokens
 //   - from them, consider only the top tokens with cumulative probability > P
 //
-// TODO: not sure if this implementation is correct
+// FIXME: not sure if this implementation is correct
 // TODO: temperature is not implemented
 //
 gpt_vocab::id gpt_sample_top_k_top_p(
