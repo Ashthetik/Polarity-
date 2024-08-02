@@ -15,9 +15,9 @@ This project is a combination of facial emotion recognition (FER), sentiment ana
 
 ## Installation:
 1. Clone the repository: `git clone https://github.com/Ashthetik/Polarity-.git`
-2. run **BOTH** the installers in `installers/` (linux only)
+2. run **BOTH** the installers in `installers/`
 3. create a `build/` directory and run `cmake ..`
-4. now `make -j $nproc` or `ninja` 
+4. now `make -j $nproc` or `ninja` (note for windows do `cmake --build .  --target install`)
 
 > [!IMPORTANT]
 > Please note, this won't actually run yet, so please don't open an issue regarding it not running.
