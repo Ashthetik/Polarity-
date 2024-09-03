@@ -1,7 +1,0 @@
-[submodule "includes/pybind11"]
-	path = includes/pybind11
-	url = ../../pybind/pybind11
-	branch = stable
-[submodule "includes/includes/Whisper"]
-	path = includes/includes/Whisper
-	url = https://github.com/ggerganov/whisper.cpp
