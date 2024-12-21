@@ -1,7 +1,7 @@
 #include "smooth.h"
 
 #include <iostream>
-#include "../deblur/deblur.h"
+#include "deblur.h"
 
 void Smooth::smooth(const cv::Mat &frame) {
     const cv::Mat clone = frame.clone();

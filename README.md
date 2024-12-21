@@ -26,7 +26,7 @@ This project is a combination of facial emotion recognition (FER), sentiment ana
 1. [Coming Soon]
 
 ## Authors And Contributors:
-- Ashley (me@ashleyxir.tech)
+- Ashlynn (me@ashleyxir.tech)
 - CallMeZombie ([Zonbi-san](https://github.com/Zonbi-san))
 
 ## Credits:

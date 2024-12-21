@@ -33,6 +33,6 @@ if (MSVC)
     )
 else()
     target_compile_options(${PROJECT_NAME} PRIVATE
-            -Wall -Wextra -O3 -march=native
+            -Wall -Wextra -O2 -march=native
     )
 endif()

@@ -14,6 +14,9 @@ float Matrix::get(int i, int j) const {
     return Matrix_[i][j];
 }
 
+/**
+ * @brief For pretty printing DEBUG statments 
+ */
 void Matrix::print() const {
     #pragma omp parallel for
     for (const auto & i : Matrix_) {

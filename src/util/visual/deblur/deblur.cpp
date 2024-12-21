@@ -4,7 +4,8 @@
 using namespace std;
 using namespace cv;
 
-cv::Mat MotionBlur::deblur(cv::Mat frame) {
+cv::Mat MotionBlur::deblur(cv::Mat frame)
+{
     constexpr int len = 125;
     constexpr double theta = 0;
     constexpr double snr = 700;
@@ -33,7 +34,8 @@ cv::Mat MotionBlur::deblur(cv::Mat frame) {
     return output;
 }
 
-void MotionBlur::calculatePSF(cv::Mat output, const cv::Size filter, const int len, const double theta) {
+void MotionBlur::calculatePSF(cv::Mat output, const cv::Size filter, const int len, const double theta)
+{
     cv::Mat h(filter, CV_32F, cv::Scalar(0));
     const cv::Point point(filter.width / 2, filter.height / 2);
     cv::ellipse(h, point, cv::Size(0, cvRound(static_cast<float>(len) / 2.0)), 90.0 - theta, 0, 360, cv::Scalar(255), FILLED);
@@ -42,7 +44,8 @@ void MotionBlur::calculatePSF(cv::Mat output, const cv::Size filter, const int l
     output = h / summa[0];
 }
 
-void MotionBlur::FFTShift(const cv::Mat &input, cv::Mat &output) {
+void MotionBlur::FFTShift(const cv::Mat& input, cv::Mat& output)
+{
     output = input.clone();
     const int cx = output.cols / 2;
     const int cy = output.rows / 2;
@@ -62,7 +65,8 @@ void MotionBlur::FFTShift(const cv::Mat &input, cv::Mat &output) {
     tmp.copyTo(q2);
 }
 
-void MotionBlur::filter2DFreq(const cv::Mat &input, cv::Mat &output, const cv::Mat &H) {
+void MotionBlur::filter2DFreq(const cv::Mat& input, cv::Mat& output, const cv::Mat& H)
+{
     cv::Mat planes[2] = {
         cv::Mat_<float>(input.clone()),
         cv::Mat::zeros(input.size(), CV_32F)
@@ -89,7 +93,8 @@ void MotionBlur::filter2DFreq(const cv::Mat &input, cv::Mat &output, const cv::M
     output = planes[0];
 }
 
-void MotionBlur::calculateWnrFilter(const cv::Mat &input, cv::Mat &output, const double nsr) {
+void MotionBlur::calculateWnrFilter(const cv::Mat& input, cv::Mat& output, const double nsr)
+{
     cv::Mat h;
     FFTShift(input, h);
 
@@ -110,40 +115,31 @@ void MotionBlur::calculateWnrFilter(const cv::Mat &input, cv::Mat &output, const
     cv::divide(planes[0], denom, output);
 }
 
-void MotionBlur::edgeTaper(const cv::Mat &input, cv::Mat &output, const double gamma, const double beta) {
+void MotionBlur::edgeTaper(const cv::Mat& input, cv::Mat& output, const double gamma, const double beta)
+{
     const int nx = input.cols;
     const int ny = input.rows;
     cv::Mat w1(1, nx, CV_32F, cv::Scalar(0));
     cv::Mat w2(1, ny, CV_32F, cv::Scalar(0));
 
-    auto *p1 = w1.ptr<float>(0);
-    auto *p2 = w2.ptr<float>(0);
+    auto* p1 = w1.ptr<float>(0);
+    auto* p2 = w2.ptr<float>(0);
 
     const auto dx = static_cast<float>(2.0 * CV_PI / nx);
     auto x = static_cast<float>(-CV_PI);
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < nx; i++) {
-        p1[i] = static_cast<float>(0.5 * (
-            tanh((
-               x + gamma / 2
-            ) / beta) - tanh((
-                x - gamma / 2
-            ) / beta))
-        );
+        p1[i] = static_cast<float>(0.5 * (tanh((x + gamma / 2) / beta) - tanh((x - gamma / 2) / beta)));
         x += dx;
     }
 
     const auto dy = static_cast<float>(2.0 * CV_PI / ny);
     auto y = static_cast<float>(-CV_PI);
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < ny; i++) {
-        p2[i] = static_cast<float>(0.5 * (tanh((
-            y + gamma / 2
-        ) / beta) - tanh((
-            y - gamma / 2
-        ) / beta)));
+        p2[i] = static_cast<float>(0.5 * (tanh((y + gamma / 2) / beta) - tanh((y - gamma / 2) / beta)));
 
         y += dy;
     }
