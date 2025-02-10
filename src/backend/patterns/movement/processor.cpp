@@ -24,7 +24,7 @@ Matrix MovementProcessor::process_matrix() {
 	std::vector<float> x, y;
 
 	// Flatten the matrix into two 1D arrays
-	for (const auto& mat : _matrix.Matrix_) {
+	for (const auto& mat : _matrix._Matrix) {
 		for (int i = 0; i < mat.size(); i++) {
 			if (i < 3) {
 				x.emplace_back(mat[i]);

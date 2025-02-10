@@ -63,6 +63,9 @@ enum faceDetectionAlgorithm {
 
 class RPPG {
 public:
+    ~RPPG() {
+        cv::destroyAllWindows();
+    }
     static std::unordered_map<std::string, std::vector<ld>> z_score_threshold(
         std::vector<ld> input, int lag,
         ld threshold, ld influence
@@ -98,10 +101,13 @@ private:
     float estimateHeartrate();
     void invalidateFace();
 
+    // Camera
+    int getFps(cv::Mat1d tile, int64_t time) const;
+
     // Algorithms
     rPPGAlgorithm rppga;
     faceDetectionAlgorithm fda;
-    cv::dnn::Net dnnClassifier;
+    static cv::dnn::Net dnnClassifier;
 
     // Settings
     cv::Size minFaceSize;

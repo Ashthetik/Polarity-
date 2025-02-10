@@ -23,14 +23,14 @@ public:
 
 struct Matrix {
 public:
-    std::vector<std::vector<float>> Matrix_;
+    std::vector<std::vector<float>> _Matrix;
 
     Matrix() = default;
 
     void clear();
     void set(int i, int j, float value);
-
-    [[nodiscard]] float get(int i, int j) const;
+    
+    float get(int i, int j) const;
 
     void print() const;
 
