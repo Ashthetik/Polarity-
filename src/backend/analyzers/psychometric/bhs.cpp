@@ -5,7 +5,9 @@
 #include "Matrix.h"
 #include "bhs.h"
 #include <complex>
+#include <limits>
 #include <bitset>
+#include <numeric>
 
 /**
  * @brief Logarithmic Transformation for redistributing data representations through additive means. 
@@ -19,9 +21,9 @@
  * @param k The vertical shift/translation along the Y axis
  * @return
  */
-std::vector<int64_t> log_transform(std::vector<int64_t> x, int32_t a, int64_t h, int64_t k)
+std::vector<int> log_transform(std::vector<int> x, int32_t a, int h, int k)
 {
-	std::vector<int64_t> replacer = {};
+	std::vector<int> replacer = {};
 
 #pragma omp parallel for
 	for (int i = 0; i < x.size(); i++)
@@ -43,20 +45,20 @@ struct BehaviourTable
 struct DataTable
 {
 	std::vector<std::string> class_types = {};
-	std::vector<int64_t> class_data_points = {};
-	std::vector<int64_t> common_occurrences = {};
+	std::vector<int> class_data_points = {};
+	std::vector<int> common_occurrences = {};
 	std::vector<BehaviourTable> behaviour_data = {};
 };
 
 struct CleanTableData
 {
-    std::vector<std::int64_t> voice = {};
-    std::vector<std::int64_t> bpm = {};
-    std::vector<std::int64_t> movement = {};
+    std::vector<int> voice = {};
+    std::vector<int> bpm = {};
+    std::vector<int> movement = {};
 };
 
-std::vector<int64_t> convert_mat(std::vector<Mat3D> matrix) {
-    std::vector<int64_t> replacer = {};
+std::vector<int> convert_mat(std::vector<Mat3D> matrix) {
+    std::vector<int> replacer = {};
 
     for (auto& value : matrix) {
         replacer.emplace_back(value.X);
@@ -69,24 +71,24 @@ std::vector<int64_t> convert_mat(std::vector<Mat3D> matrix) {
 }
 
 /**
- * @brief Converts a vector of float values to a vector of int64_t values.
+ * @brief Converts a vector of float values to a vector of int values.
  *
  * This function takes a vector of float values as input and returns a new vector
- * of int64_t values. Each float value in the input vector is multiplied by 100,
- * and the result is cast to an int64_t value. The resulting int64_t values are
+ * of int values. Each float value in the input vector is multiplied by 100,
+ * and the result is cast to an int value. The resulting int values are
  * stored in the output vector.
  *
  * @param array The input vector of float values.
  *
- * @return A vector of int64_t values, where each value is the result of
+ * @return A vector of int values, where each value is the result of
  *         multiplying the corresponding float value in the input vector by 100,
- *         and casting the result to an int64_t value.
+ *         and casting the result to an int value.
  */
-std::vector<int64_t> convert_float(std::vector<float> array) {
-    std::vector<int64_t> replacer = {};
+std::vector<int> convert_float(std::vector<float> array) {
+    std::vector<int> replacer = {};
 
     for (auto& value : array) {
-        replacer.emplace_back(static_cast<int64_t>(value * 100));
+        replacer.emplace_back(static_cast<int>(value * 100));
     }
 
     return replacer;
@@ -97,7 +99,7 @@ std::vector<int64_t> convert_float(std::vector<float> array) {
  *
  * This function processes the behaviour data in the input DataTable, converting
  * movement occurrences, BPM fluctuations, and voice fluctuations to cleaned
- * int64_t vectors using logarithmic transformation.
+ * int vectors using logarithmic transformation.
  *
  * @param table The DataTable containing behaviour data to be cleaned.
  *
@@ -105,9 +107,9 @@ std::vector<int64_t> convert_float(std::vector<float> array) {
  */
 CleanTableData clean_table_data(DataTable table)
 {
-    std::vector<int64_t> movement_clean = {};
-    std::vector<int64_t> bpm_clean = {};
-    std::vector<int64_t> voice_clean = {};
+    std::vector<int> movement_clean = {};
+    std::vector<int> bpm_clean = {};
+    std::vector<int> voice_clean = {};
 
     CleanTableData cleaned_data;
 
@@ -118,9 +120,9 @@ CleanTableData clean_table_data(DataTable table)
             auto bpm_vector = convert_float(it.bpm_fluctuation);
             auto voice_vector = convert_float(it.voice_fluctation);
 
-            movement_clean = log_transform(movement_vector, movement_vector.size(), movement_vector.max_size(), static_cast<int64_t>(__DBL_EPSILON__));
-            bpm_clean = log_transform(bpm_vector, bpm_vector.size(), bpm_vector.max_size(), static_cast<int64_t>(__DBL_EPSILON__));
-            voice_clean = log_transform(voice_vector, voice_vector.size(), voice_vector.max_size(), static_cast<int64_t>(__DBL_EPSILON__));
+            movement_clean = log_transform(movement_vector, movement_vector.size(), movement_vector.max_size(), static_cast<int>(std::numeric_limits<double>::epsilon()));
+            bpm_clean = log_transform(bpm_vector, bpm_vector.size(), bpm_vector.max_size(), static_cast<int>(std::numeric_limits<double>::epsilon()));
+            voice_clean = log_transform(voice_vector, voice_vector.size(), voice_vector.max_size(), static_cast<int>(std::numeric_limits<double>::epsilon()));
         }
     }
 
@@ -132,68 +134,45 @@ CleanTableData clean_table_data(DataTable table)
 }
 
 
-/** -------------------- Data Processing ----------------------- */
+// TODO: Follow the cited paper 
+behaviour_data calculate_stress_level(behaviour_data bpd) {
 
-enum ModelChoices {
-    MODEL_A = 0, // Learnable Evolution Model
-    MODEL_B = 1, // Learnable Hieararchical Variation Model
-    MODEL_C = 2, // Recurrent Neural Network
-};
-
-void data_preprocessing(CleanTableData cleaned_data, ModelChoices model) {
-    switch (model) {
-        case MODEL_A:
-            // Apply data processing for MODEL_A
-            break;
-        case MODEL_B:
-            // Apply data processing for MODEL_B
-            break;
-        case MODEL_C:
-            // Apply data processing for MODEL_C
-            break;
-        default:
-            std::cerr << "Invalid model choice. Please choose a valid model." << std::endl;
-    }
-
-    // TODO: Add more model-specific data processing steps as needed
-    // Example: Normalize data, feature extraction, etc.
 }
 
-// TOOD: Infer the model choice via a local variable or from OOP interface
-void model_training(CleanTableData cleaned_data, ModelChoices model) {
-    switch (model) {
-        case MODEL_A:
-            // Train MODEL_A
-            break;
-        case MODEL_B:
-            // Train MODEL_B
-            break;
-        case MODEL_C:
-            // Train MODEL_C
-            break;
-        default:
-            std::cerr << "Invalid model choice. Please choose a valid model." << std::endl;
+float heart_rate_trend(std::vector<float> prior_heart_rates, std::vector<float> curr_heart_rates)
+{
+    if (prior_heart_rates.size() <= 0 || curr_heart_rates.size() <= 0) {
+        std::cout << "[ERROR] Heart Rate Data is Nil." << std::endl;
+        return 0.0f;
     }
 
-    // TODO: Add more model-specific training steps as needed
-    // Example: Split data into training and validation sets, set up hyperparameters, train the model
+    float sum_of_a = std::accumulate(prior_heart_rates.begin(), prior_heart_rates.end(), 0);
+    float sum_of_b = std::accumulate(curr_heart_rates.begin(), curr_heart_rates.end(), 0);
+
+    return ((sum_of_b - sum_of_a) / sum_of_a) * 100;
 }
 
-void model_evaluation(CleanTableData cleaned_data, ModelChoices model) {
-    switch (model) {
-        case MODEL_A:
-            // Evaluate MODEL_A
-            break;
-        case MODEL_B:
-            // Evaluate MODEL_B
-            break;
-        case MODEL_C:
-            // Evaluate MODEL_C
-            break;
-        default:
-            std::cerr << "Invalid model choice. Please choose a valid model." << std::endl;
+float action_trend(std::vector<int> prior_choices, std::vector<int> curr_choices)
+{
+    if (prior_choices.size() <= 0 || curr_choices.size() <= 0) {
+        std::cout << "[ERROR] Actions Trend Data is Nil." << std::endl;
+        return 0.0f;
     }
 
-    // TODO: Add more model-specific evaluation steps as needed
-    // Example: Calculate metrics like accuracy, precision, recall, F1-score, etc.
+    float sum_a = std::accumulate(prior_choices.begin(), prior_choices.end(), 0);
+    float sum_b = std::accumulate(curr_choices.begin(), curr_choices.end(), 0);
+
+    return ((sum_a - sum_b) / sum_a) * 100;
+}
+
+std::vector<float> vocal_strain_trend(
+    std::vector<float> praat_hnr, std::vector<float> adsv, 
+    std::vector<float> cpp, std::vector<float> csid, 
+    std::vector<float> lh_ratio
+) {
+    return std::vector<float>();
+}
+
+std::vector<float> calculate_praat_hnr() {
+    
 }
