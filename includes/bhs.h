@@ -97,4 +97,14 @@ float find_snr(std::vector<float> data) {
 	return mean / std_dev;
 }
 
+auto resample_data(auto data);
+
+float mean_hnr_data(auto data);
+
+auto to_harmonics(auto data);
+
+auto cepstral_smoothing(auto data);
+
+float calculate_praat_hnr(auto data);
+
 #endif

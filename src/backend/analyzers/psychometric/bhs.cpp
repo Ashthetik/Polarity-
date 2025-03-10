@@ -173,6 +173,61 @@ std::vector<float> vocal_strain_trend(
     return std::vector<float>();
 }
 
-std::vector<float> calculate_praat_hnr() {
-    
+float calculate_praat_hnr(std::vector<float> data) {
+    float h2n = mean_hnr_data(data);
+
+    auto sound = data.end();
+
+    // Harmonic Weighting
+    auto harmonics = to_harmonics(data);
+
+    return 0.0f;
 }
+
+auto resample_data(auto data) {
+
+}
+
+float mean_hnr_data(auto data) {
+    // auto base = to_harmonics(data);
+    return find_snr_data(data);
+}
+
+// TODO VERIFY the function is correct and doesn't contain runtime or compiler errors in relation to UAF
+/// Also check the math 
+/// @param data 
+/// @return 
+auto to_harmonics(std::vector<float> data) {
+    /// REF: f(n) = n * f(1) = n * v2L
+    /** REF: Simplified Harmonic decomposition
+     * speed = frequency • wavelength
+
+     * frequency = speed/wavelength
+     */
+
+    auto speed = [&data](int frequency, int wavelength) {
+        for (int i = 0; i < data.size(); i++) {
+            data[i] *= frequency / wavelength;
+        }
+
+        return static_cast<std::vector<float>>(data);
+    };
+
+    auto wavelength = [data](int frequency, int length) {
+        return static_cast<float>(length) / frequency;
+    };
+
+    // Create harmonic data
+    std::vector<float> harmonic_data(data.size());
+
+    for (int i = 1; i <= 10; i++) {
+        harmonic_data = speed(i, wavelength(i, data.size()));
+    }
+
+    return harmonic_data;
+}
+
+auto cepstral_smoothing(auto data) {
+    /// REF: https://ccrma.stanford.edu/~jos/sasp/Cepstral_Windowing.html
+}
+
