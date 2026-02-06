@@ -1,5 +1,7 @@
 # Polarity++
 
+codebase has been moved to: https://codeberg.org/Asthetik/Polarity and will be continued to be maintained there.
+
 > [!IMPORTANT]
 > This project is in **ALPHA** stages and __**IS NOT**__ expected to work and may cause potential damage in extreme cases.
 > Proceed at your own risk.
